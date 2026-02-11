@@ -1,0 +1,17 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Data
+data/raw/
+data/processed/
+
+# Models
+models/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IntelliJ
+.idea/
