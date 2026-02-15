@@ -236,6 +236,3 @@ After running the pipeline, check:
 
 ---
 
-## Documentation
-
-See **docs/DOCUMENTATION_COURS.md** for a full course-style documentation and interview preparation (FAQ ML, metrics, pipeline details).
