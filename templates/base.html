@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Predict football player reinjury risk within 90 days. Data-driven tool for clubs and sports scientists.">
+  <title>{% block title %}Football Injury Risk Predictor{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
+            pitch: { 400: '#4ade80', 500: '#22c55e', 600: '#16a34a', 700: '#15803d', 800: '#166534' },
+            risk: { low: '#059669', medium: '#d97706', high: '#dc2626' },
+            surface: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0' },
+          },
+          fontFamily: { sans: ['Outfit', 'system-ui', 'sans-serif'] },
+          boxShadow: { card: '0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05)', 'card-hover': '0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05)' },
+        },
+      },
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/theme.css">
+  <style>
+    body { font-family: 'Outfit', system-ui, sans-serif; }
+    .nav-link { padding: 0.5rem 0.75rem; border-radius: 0.5rem; transition: background 0.2s, color 0.2s; }
+    .nav-link:hover { background: rgb(239 246 255); color: rgb(37 99 235); }
+    .nav-link.active { background: rgb(239 246 255); color: rgb(37 99 235); font-weight: 600; }
+    .dark .nav-link:hover { background: rgb(30 58 138 / 0.3); color: rgb(147 197 253); }
+    .dark .nav-link.active { background: rgb(30 58 138 / 0.4); color: rgb(147 197 253); }
+    .animate-fade-in { animation: fadeIn 0.35s ease-out; }
+    .animate-slide-up { animation: slideUp 0.4s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body class="bg-surface-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 min-h-screen antialiased flex flex-col transition-colors duration-200">
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <header id="navbar" class="bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 backdrop-blur-sm transition-all duration-300" role="banner">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+      <a href="/" class="flex items-center gap-2.5 shrink-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900" aria-label="Home - Football Injury Risk">
+        <span class="w-9 h-9 rounded-xl bg-primary-600 flex items-center justify-center text-white font-bold text-sm shadow-sm" aria-hidden="true">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </span>
+        <span class="font-semibold text-slate-800 dark:text-slate-100 tracking-tight hidden sm:inline">Football Injury Risk</span>
+      </a>
+      <nav class="flex items-center gap-1" role="navigation" aria-label="Main">
+        <a href="/" class="nav-link text-slate-600 dark:text-slate-300 flex items-center gap-1.5 {% if request.url.path == '/' %}active{% endif %}" aria-current="{% if request.url.path == '/' %}page{% endif %}">
+          <svg class="w-4 h-4 text-primary-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1V5zm0 6a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1v-3z" clip-rule="evenodd"/></svg>
+          Home
+        </a>
+        <a href="/about" class="nav-link text-slate-600 dark:text-slate-300 flex items-center gap-1.5 {% if request.url.path == '/about' %}active{% endif %}" aria-current="{% if request.url.path == '/about' %}page{% endif %}">
+          <svg class="w-4 h-4 text-primary-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+          About
+        </a>
+        <a href="/predict" class="ml-2 rounded-lg bg-primary-600 text-white font-medium px-4 py-2 text-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 dark:focus:ring-offset-slate-900 btn-interact shadow-sm flex items-center gap-1.5" aria-label="Go to prediction form">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Predict
+        </a>
+      </nav>
+      <button type="button" id="dark-mode-toggle" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors" aria-label="Toggle dark mode">
+        <span id="dark-icon-sun" class="hidden dark:block"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg></span>
+        <span id="dark-icon-moon" class="block dark:hidden"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg></span>
+      </button>
+    </div>
+  </header>
+  <main id="main" class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12" role="main">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="border-t border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 py-5 mt-auto transition-colors" role="contentinfo">
+    <div class="max-w-4xl mx-auto px-4 text-center text-slate-500 dark:text-slate-400 text-sm space-y-1">
+      <p>Not a medical tool. For educational and research use only.</p>
+      <p>Model v{{ version | default('1.0.0') }} · {{ build_date | default('—') }}</p>
+    </div>
+  </footer>
+  <script>
+    (function() {
+      var toggle = document.getElementById('dark-mode-toggle');
+      if (toggle) {
+        var isDark = localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDark) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark');
+        toggle.addEventListener('click', function() {
+          document.documentElement.classList.toggle('dark');
+          localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        });
+      }
+      window.addEventListener('scroll', function() {
+        var nav = document.getElementById('navbar');
+        if (nav) nav.classList.toggle('scrolled', window.scrollY > 20);
+      });
+    })();
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

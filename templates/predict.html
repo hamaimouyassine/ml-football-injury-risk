@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% block title %}Predict — Football Injury Risk Predictor{% endblock %}
+{% block content %}
+<div class="animate-fade-in">
+  <h1 class="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">Injury risk prediction</h1>
+  <p class="text-slate-600 dark:text-slate-400 mb-8">Enter player and injury history to estimate <strong>reinjury probability within 90 days</strong> after return.</p>
+
+  <div class="mb-8" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="3" aria-label="Form step 1 of 3">
+    <div class="flex items-center justify-between max-w-sm">
+      <div class="flex items-center">
+        <span class="step-dot w-9 h-9 rounded-full bg-primary-600 text-white font-semibold flex items-center justify-center text-sm">1</span>
+        <span class="ml-2 text-sm font-medium text-slate-700 dark:text-slate-300">Personal</span>
+      </div>
+      <div class="flex-1 h-0.5 bg-slate-200 dark:bg-slate-600 mx-2" aria-hidden="true"></div>
+      <div class="flex items-center">
+        <span class="step-dot w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-600 text-slate-500 font-semibold flex items-center justify-center text-sm">2</span>
+        <span class="ml-2 text-sm text-slate-500">Performance</span>
+      </div>
+      <div class="flex-1 h-0.5 bg-slate-200 dark:bg-slate-600 mx-2" aria-hidden="true"></div>
+      <div class="flex items-center">
+        <span class="step-dot w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-600 text-slate-500 font-semibold flex items-center justify-center text-sm">3</span>
+        <span class="ml-2 text-sm text-slate-500">History</span>
+      </div>
+    </div>
+  </div>
+
+  <form id="predict-form" class="space-y-6">
+    <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 shadow-card border border-slate-200 dark:border-slate-700" aria-labelledby="step1-heading">
+      <h2 id="step1-heading" class="text-base font-semibold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-md bg-primary-100 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">1</span>
+        Personal info
+      </h2>
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div>
+          <label for="age" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Age</label>
+          <input type="number" id="age" name="age" min="16" max="45" value="25" required
+            class="input-focus w-full rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+            placeholder="e.g. 25"
+            data-tooltip="Valid range: 16–45 years"
+            aria-describedby="age-hint">
+          <p id="age-hint" class="text-xs text-slate-500 dark:text-slate-400 mt-1">16–45 years</p>
+        </div>
+        <div>
+          <label for="position" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Position</label>
+          <select id="position" name="position" required
+            class="input-focus w-full rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-700 transition-all"
+            data-tooltip="Player position on the pitch"
+            aria-describedby="position-desc">
+            {% for p in positions %}
+            <option value="{{ p }}">{{ p }}</option>
+            {% endfor %}
+          </select>
+          <p id="position-desc" class="text-xs text-slate-500 dark:text-slate-400 mt-1 sr-only">Select position</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 shadow-card border border-slate-200 dark:border-slate-700" aria-labelledby="step2-heading">
+      <h2 id="step2-heading" class="text-base font-semibold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-md bg-primary-100 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">2</span>
+        Performance
+      </h2>
+      <div class="max-w-xs">
+        <label for="fifa_rating" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">FIFA rating</label>
+        <input type="number" id="fifa_rating" name="fifa_rating" min="50" max="99" step="0.1" value="75" required
+          class="input-focus w-full rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+          placeholder="e.g. 78"
+          data-tooltip="Valid range: 50–99"
+          aria-describedby="fifa-hint">
+        <p id="fifa-hint" class="text-xs text-slate-500 dark:text-slate-400 mt-1">50–99</p>
+      </div>
+    </section>
+
+    <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 shadow-card border border-slate-200 dark:border-slate-700" aria-labelledby="step3-heading">
+      <h2 id="step3-heading" class="text-base font-semibold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-md bg-primary-100 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">3</span>
+        Injury history
+      </h2>
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div>
+          <label for="injury" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Last injury type</label>
+          <select id="injury" name="injury" required
+            class="input-focus w-full rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-slate-700 transition-all"
+            data-tooltip="Type of the most recent injury">
+            {% for i in injuries %}
+            <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="absence_days" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Absence (days)</label>
+          <input type="number" id="absence_days" name="absence_days" min="1" max="730" value="14" required
+            class="input-focus w-full rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+            placeholder="e.g. 21"
+            data-tooltip="Valid range: 1–730 days"
+            aria-describedby="absence-hint">
+          <p id="absence-hint" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Days out for last injury</p>
+        </div>
+        <div>
+          <label for="previous_injuries" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Previous injuries (count)</label>
+          <input type="number" id="previous_injuries" name="previous_injuries" min="0" max="50" value="0" required
+            class="input-focus w-full rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+            placeholder="0"
+            data-tooltip="Valid range: 0–50"
+            aria-describedby="prev-hint">
+          <p id="prev-hint" class="text-xs text-slate-500 dark:text-slate-400 mt-1 sr-only">Number of previous injuries</p>
+        </div>
+        <div>
+          <label for="days_since_last_injury" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Days since last return</label>
+          <input type="number" id="days_since_last_injury" name="days_since_last_injury" min="0" max="2000" value="90" required
+            class="input-focus w-full rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-4 py-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+            placeholder="90 or 999 if first injury"
+            data-tooltip="Use 999 if this was the first injury"
+            aria-describedby="days-hint">
+          <p id="days-hint" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Use 999 if first injury</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="flex flex-wrap gap-3 items-center">
+      <button type="button" id="fill-high-risk" class="rounded-xl border-2 border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 font-medium px-4 py-2.5 text-sm hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500" aria-label="Fill form with highest risk example">
+        Try example: highest risk profile (~50%)
+      </button>
+      <span class="text-slate-500 dark:text-slate-400 text-sm">Fills the form with the <strong>maximum</strong> reinjury probability profile (~50%). 90%+ would require more data.</span>
+    </div>
+
+    <div id="form-errors" class="hidden rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-amber-800 dark:text-amber-200 px-4 py-3 text-sm flex items-start gap-2" role="alert">
+      <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92z" clip-rule="evenodd"/></svg>
+      <span id="form-errors-text"></span>
+    </div>
+
+    <button type="submit" id="submit-btn" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold px-8 py-4 shadow-card hover:shadow-card-hover btn-interact focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 dark:focus:ring-offset-slate-900 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200" aria-busy="false" aria-live="polite">
+      <span id="btn-text">Predict reinjury risk</span>
+      <span id="btn-spinner" class="hidden" aria-hidden="true">
+        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+      </span>
+    </button>
+  </form>
+
+  <div id="result-card" class="hidden mt-10 animate-slide-up" role="status" aria-live="polite" aria-label="Prediction result">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 shadow-card border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-6">Result</h2>
+      <div class="flex flex-col sm:flex-row sm:items-center gap-6 flex-wrap">
+        <div class="flex items-center gap-4">
+          <div class="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0" aria-hidden="true">
+            <svg class="w-full h-full" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="44" fill="none" stroke="var(--tw-gradient-from)" class="stroke-slate-200 dark:stroke-slate-600" stroke-width="8"/>
+              <circle id="gauge-circle" class="gauge-circle stroke-slate-300 dark:stroke-slate-600" cx="50" cy="50" r="44" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="0 276"/>
+            </svg>
+            <span id="result-prob" class="absolute inset-0 flex items-center justify-center text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100">—</span>
+          </div>
+          <div>
+            <p class="text-slate-500 dark:text-slate-400 font-medium">Reinjury probability (90 days)</p>
+            <span id="result-badge" class="inline-block mt-2 rounded-full px-4 py-2 text-sm font-semibold">—</span>
+          </div>
+        </div>
+      </div>
+      <div class="mt-6" aria-label="Risk scale on pitch">
+        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-medium mb-2">Risk on scale</p>
+        <div class="h-4 rounded-full overflow-hidden flex bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 relative" style="max-width: 100%;">
+          <div id="pitch-marker" class="absolute top-0 bottom-0 w-1 bg-slate-900 dark:bg-white shadow-md rounded-full transition-all duration-500" style="left: 0%; transform: translateX(-50%);"></div>
+        </div>
+        <div class="flex justify-between text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <span>0% Low</span>
+          <span>50%</span>
+          <span>100% High</span>
+        </div>
+      </div>
+      <p id="result-explanation" class="mt-6 text-slate-600 dark:text-slate-400 text-sm leading-relaxed"></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  var form = document.getElementById('predict-form');
+  var resultCard = document.getElementById('result-card');
+  var resultProb = document.getElementById('result-prob');
+  var resultBadge = document.getElementById('result-badge');
+  var gaugeCircle = document.getElementById('gauge-circle');
+  var pitchMarker = document.getElementById('pitch-marker');
+  var resultExplanation = document.getElementById('result-explanation');
+  var formErrors = document.getElementById('form-errors');
+  var formErrorsText = document.getElementById('form-errors-text');
+  var submitBtn = document.getElementById('submit-btn');
+  var btnText = document.getElementById('btn-text');
+  var btnSpinner = document.getElementById('btn-spinner');
+  var circumference = 2 * Math.PI * 44;
+
+  function showErrors(msg) {
+    formErrorsText.textContent = msg;
+    formErrors.classList.remove('hidden');
+  }
+  function hideErrors() {
+    formErrors.classList.add('hidden');
+  }
+  function setLoading(loading) {
+    submitBtn.disabled = loading;
+    submitBtn.setAttribute('aria-busy', loading);
+    btnText.classList.toggle('hidden', loading);
+    btnSpinner.classList.toggle('hidden', !loading);
+  }
+  function riskClass(level) {
+    if (level === 'Low') return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-700';
+    if (level === 'Medium') return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200 border border-amber-200 dark:border-amber-700';
+    return 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200 border border-red-200 dark:border-red-700';
+  }
+  function riskExplanation(level) {
+    if (level === 'Low') return 'Reinjury probability in the next 90 days is relatively low. Continue standard monitoring and load management.';
+    if (level === 'Medium') return 'Moderate reinjury risk. Consider gradual return-to-play and closer follow-up.';
+    return 'Higher reinjury probability. Recommend careful rehabilitation and medical oversight before full return.';
+  }
+  function gaugeStrokeColor(pct) {
+    if (pct <= 30) return 'stroke-emerald-500';
+    if (pct <= 60) return 'stroke-amber-500';
+    return 'stroke-red-500';
+  }
+  function setGauge(pct) {
+    var dash = (pct / 100) * circumference;
+    gaugeCircle.setAttribute('stroke-dasharray', dash + ' ' + circumference);
+    gaugeCircle.setAttribute('class', 'gauge-circle ' + gaugeStrokeColor(pct));
+  }
+
+  var highRiskExample = { age: 32, position: 'Center Forward', injury: 'Hamstring strain', fifa_rating: 74, absence_days: 120, previous_injuries: 10, days_since_last_injury: 5 };
+  document.getElementById('fill-high-risk').addEventListener('click', function() {
+    document.getElementById('age').value = highRiskExample.age;
+    document.getElementById('position').value = highRiskExample.position;
+    document.getElementById('injury').value = highRiskExample.injury;
+    document.getElementById('fifa_rating').value = highRiskExample.fifa_rating;
+    document.getElementById('absence_days').value = highRiskExample.absence_days;
+    document.getElementById('previous_injuries').value = highRiskExample.previous_injuries;
+    document.getElementById('days_since_last_injury').value = highRiskExample.days_since_last_injury;
+    hideErrors();
+  });
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    hideErrors();
+    resultCard.classList.add('hidden');
+
+    var age = parseInt(document.getElementById('age').value, 10);
+    var fifa = parseFloat(document.getElementById('fifa_rating').value);
+    if (isNaN(age) || age < 16 || age > 45) { showErrors('Age must be between 16 and 45.'); return; }
+    if (isNaN(fifa) || fifa < 50 || fifa > 99) { showErrors('FIFA rating must be between 50 and 99.'); return; }
+
+    var payload = {
+      age: age,
+      position: document.getElementById('position').value,
+      injury: document.getElementById('injury').value,
+      fifa_rating: fifa,
+      absence_days: parseInt(document.getElementById('absence_days').value, 10),
+      previous_injuries: parseInt(document.getElementById('previous_injuries').value, 10),
+      days_since_last_injury: parseInt(document.getElementById('days_since_last_injury').value, 10)
+    };
+
+    setLoading(true);
+    try {
+      var res = await fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      var data = await res.json().catch(function() { return null; });
+      if (!res.ok) {
+        var detail = data?.detail;
+        var msg = typeof detail === 'string' ? detail : (Array.isArray(detail) ? detail.map(function(x) { return x.msg || (x.loc && x.loc.join('.')); }).filter(Boolean).join(' ') : 'Prediction failed. Check your inputs.');
+        showErrors(msg || 'Prediction failed. Check your inputs.');
+        return;
+      }
+      var pct = Math.round(data.injury_probability * 1000) / 10;
+      var level = data.risk_level;
+      resultProb.textContent = pct + '%';
+      resultBadge.textContent = level;
+      resultBadge.className = 'inline-block mt-2 rounded-full px-4 py-2 text-sm font-semibold ' + riskClass(level);
+      setGauge(pct);
+      if (pitchMarker) pitchMarker.style.left = pct + '%';
+      resultExplanation.textContent = riskExplanation(level);
+      resultCard.classList.remove('hidden');
+    } catch (err) {
+      showErrors('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  });
+})();
+</script>
+{% endblock %}

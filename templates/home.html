@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Home — Football Injury Risk Predictor{% endblock %}
+{% block content %}
+<section class="relative rounded-2xl overflow-hidden pitch-bg grass-overlay py-12 sm:py-16 px-6 sm:px-10 text-center animate-fade-in">
+  <div class="absolute inset-0 bg-gradient-to-b from-slate-900/40 to-slate-900/70" aria-hidden="true"></div>
+  <div class="relative z-10 max-w-2xl mx-auto">
+    <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/10 backdrop-blur border border-white/20 mb-6" aria-hidden="true">
+      <svg class="w-8 h-8 sm:w-10 sm:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+      </svg>
+    </div>
+    <p class="inline-flex items-center gap-2 rounded-full bg-white/10 text-white/95 text-sm font-medium px-4 py-1.5 mb-6 backdrop-blur">
+      <span class="w-2 h-2 rounded-full bg-pitch-400 animate-pulse" aria-hidden="true"></span>
+      Data-driven reinjury risk
+    </p>
+    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-4 leading-tight">
+      Football Injury Risk Predictor
+    </h1>
+    <p class="text-white/90 text-lg sm:text-xl leading-relaxed mb-10">
+      Predict injury risk like clubs and sports scientists.
+    </p>
+    <p class="text-white/80 text-base mb-10">
+      Estimate the probability that a professional player will sustain a <strong>reinjury within 90 days</strong> after return. Support prevention and load management—not a substitute for medical advice.
+    </p>
+    <a href="/predict" class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-500 hover:bg-primary-400 text-white font-semibold px-8 py-4 shadow-lg hover:shadow-xl btn-interact focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-800 transition-all duration-200" aria-label="Start injury risk prediction">
+      Start Prediction
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+    </a>
+  </div>
+</section>
+
+<section class="mt-12 sm:mt-16 grid sm:grid-cols-3 gap-6 animate-slide-up" style="animation-delay: 0.1s; animation-fill-mode: both;" aria-label="How it works">
+  <article class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-card border border-slate-200 dark:border-slate-700 hover:shadow-card-hover hover:border-primary-200 dark:hover:border-primary-800 transition-all duration-200 card-enter">
+    <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 flex items-center justify-center font-bold text-lg mb-4" aria-hidden="true">1</div>
+    <h2 class="font-semibold text-slate-800 dark:text-slate-100 mb-2">Enter data</h2>
+    <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">Age, position, injury type, FIFA rating, and history (absence days, previous injuries, days since return).</p>
+  </article>
+  <article class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-card border border-slate-200 dark:border-slate-700 hover:shadow-card-hover hover:border-primary-200 dark:hover:border-primary-800 transition-all duration-200 card-enter">
+    <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 flex items-center justify-center font-bold text-lg mb-4" aria-hidden="true">2</div>
+    <h2 class="font-semibold text-slate-800 dark:text-slate-100 mb-2">Get probability</h2>
+    <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">The model returns a reinjury probability (0–100%) and a risk level: Low, Medium, or High.</p>
+  </article>
+  <article class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-card border border-slate-200 dark:border-slate-700 hover:shadow-card-hover hover:border-primary-200 dark:hover:border-primary-800 transition-all duration-200 card-enter">
+    <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 flex items-center justify-center font-bold text-lg mb-4" aria-hidden="true">3</div>
+    <h2 class="font-semibold text-slate-800 dark:text-slate-100 mb-2">Act on it</h2>
+    <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">Use the result to inform monitoring and return-to-play decisions—always with professional oversight.</p>
+  </article>
+</section>
+{% endblock %}
